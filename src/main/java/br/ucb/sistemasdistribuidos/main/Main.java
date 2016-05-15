@@ -9,7 +9,9 @@ import br.ucb.sistemasdistribuidos.services.Talk;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,11 +25,11 @@ public class Main {
             ServerSocket server = new ServerSocket(2000);
             System.out.println("Server started at " + new Date());
             Socket waitingClient = null;
+            
             while(true){
                 Socket socket = server.accept();
                 System.out.println("Cliente connected.");
-                
-                if(waitingClient == null || waitingClient.isClosed()){
+                if(waitingClient == null ){
                     waitingClient = socket;
                     System.out.println("Cliente waiting.");
                     
@@ -35,7 +37,7 @@ public class Main {
                     System.out.println("Talking initiated.");
                     
                     Talk talk = new Talk(socket, waitingClient);
-                   // manager.addTalk(talk);
+                            
                     talk.start();
                     
                     waitingClient = null;

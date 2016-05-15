@@ -17,7 +17,9 @@ import java.util.logging.Logger;
  *
  * @author lucianoalmeida
  */
-public class Talk implements Observer,Closeable{
+public class Talk implements Closeable{
+    public static Integer TRANSFER_BLOCK_SIZE = 8000;
+
     private Socket client;
     private Socket otherClient;
 
@@ -48,8 +50,7 @@ public class Talk implements Observer,Closeable{
     }
     
     private void startTransferFromClientToOther(Socket from, Socket to){
-        ClientWritter writter = new ClientWritter(from, to);
-        writter.addObserver(this);
+        ClientWritter writter = new ClientWritter(this,from, to, TRANSFER_BLOCK_SIZE);
         Thread t = new Thread(writter);
         t.start();
     }
@@ -63,27 +64,19 @@ public class Talk implements Observer,Closeable{
         return false; 
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        try {
-            close();
-        } catch (IOException ex) {
-            Logger.getLogger(Talk.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
+    
+    
     @Override
     public void close() throws IOException {
-        System.out.println("closing talk");
         if(getClient()!= null ){
             getClient().close();
         }
         if(getOtherClient()!= null){
            getOtherClient().close();
         }
-        
-        
     }
+
+ 
 
     
     

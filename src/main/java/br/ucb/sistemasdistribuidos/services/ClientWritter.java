@@ -19,8 +19,11 @@ import java.util.logging.Logger;
  */
 
 
-public class ClientWritter extends Observable implements Runnable{
+public class ClientWritter implements Runnable{
 
+    
+    private Talk talk;
+    
     private Socket client;
     private Socket otherClient;
     
@@ -52,6 +55,14 @@ public class ClientWritter extends Observable implements Runnable{
         this.active = active;
     }  
 
+    public Talk getTalk() {
+        return talk;
+    }
+
+    public void setTalk(Talk talk) {
+        this.talk = talk;
+    }
+
     public int getBufferBlockSize() {
         return bufferBlockSize;
     }
@@ -59,14 +70,15 @@ public class ClientWritter extends Observable implements Runnable{
     public void setBufferBlockSize(int bufferBlockSize) {
         this.bufferBlockSize = bufferBlockSize;
     }
-    public ClientWritter(Socket client, Socket other){
+    public ClientWritter(Talk talk, Socket client, Socket other){
+        setTalk(talk);
         setClient(client);
         setOtherClient(other);
         setActive(true);
         setBufferBlockSize(1024);
     }        
-    public ClientWritter(Socket client, Socket other, int bufferBlockSize) {
-        this(client, other);
+    public ClientWritter(Talk talk, Socket client, Socket other, int bufferBlockSize) {
+        this(talk,client, other);
         setBufferBlockSize(bufferBlockSize);
     }
 
@@ -86,10 +98,17 @@ public class ClientWritter extends Observable implements Runnable{
                 dataOutPut = new DataOutputStream(getOtherClient().getOutputStream());
                 dataOutPut.write(audioBytes, 0, bytesReaded);
             } catch (IOException ex) {
-                setActive(false);
-                notifyObservers();
                 Logger.getLogger(ClientWritter.class.getName()).log(Level.SEVERE, null, ex);
-            } 
+                setActive(false);
+                if(getTalk() != null){
+                    try {
+                        getTalk().close();
+                    } catch (IOException ex1) {
+                        Logger.getLogger(ClientWritter.class.getName()).log(Level.SEVERE, null, ex1);
+                    }
+                }
+            }
+            
         }
     }
     
